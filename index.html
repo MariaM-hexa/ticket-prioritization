@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ticket Prioritization System</title>
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+<div class="container">
+<h1>Service Desk Ticket Submission</h1>
+<textarea id="ticketDescription" placeholder="Describe the issue here..."></textarea>
+<button onclick="submitTicket()">Submit Ticket</button>
+ 
+        <div id="result" class="result"></div>
+</div>
+ 
+    <script>
+        async function submitTicket() {
+            const description = document.getElementById('ticketDescription').value;
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = "Processing...";
+ 
+            try {
+                const response = await fetch('/submit_ticket', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ description })
+                });
+ 
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    resultDiv.innerHTML = `<p class="error">${errorData.error}</p>`;
+                    return;
+                }
+ 
+                const data = await response.json();
+                resultDiv.innerHTML = `
+<h3>Ticket Processed</h3>
+<p><strong>Description:</strong> ${data.description}</p>
+<p><strong>Priority:</strong> ${data.priority}</p>
+<p><strong>Category:</strong> ${data.category}</p>
+<p><strong>Assigned Agent:</strong> ${data.assigned_agent}</p>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">Error submitting ticket.</p>`;
+            }
+        }
+</script>
+</body>
+</html>
